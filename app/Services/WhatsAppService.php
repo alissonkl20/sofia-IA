@@ -31,10 +31,19 @@ class WhatsAppService
 
         $endpoint = $apiUrl.config('whatsapp.send_endpoint', '/send');
 
-        $response = $request->post($endpoint, [
-            'to' => $to,
-            'message' => $message,
-        ]);
+        try {
+            $response = $request->post($endpoint, [
+                'to' => $to,
+                'message' => $message,
+            ]);
+        } catch (\Throwable $exception) {
+            Log::error('WhatsApp send exception', [
+                'to' => $to,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return false;
+        }
 
         if (! $response->successful()) {
             Log::error('WhatsApp send failed', [

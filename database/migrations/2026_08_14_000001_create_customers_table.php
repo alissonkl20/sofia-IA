@@ -13,7 +13,6 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->string('phone')->unique();
             $table->string('whatsapp_id')->nullable()->index();
-            $table->string('email')->nullable();
             $table->timestamps();
         });
     }

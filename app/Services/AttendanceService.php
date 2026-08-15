@@ -50,6 +50,10 @@ class AttendanceService
 
     public function isHumanAttendanceActive(): bool
     {
+        if (config('sofia.force_ai', false)) {
+            return false;
+        }
+
         if ($this->isHumanManuallyOnline()) {
             return true;
         }

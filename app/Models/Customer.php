@@ -11,7 +11,6 @@ class Customer extends Model
         'name',
         'phone',
         'whatsapp_id',
-        'email',
     ];
 
     public function conversations(): HasMany
