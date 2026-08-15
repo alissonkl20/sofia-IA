@@ -1,5 +1,7 @@
 <?php
 
+use App\Providers\HorizonServiceProvider;
+
 return [
-    App\Providers\HorizonServiceProvider::class,
+    HorizonServiceProvider::class,
 ];

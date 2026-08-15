@@ -3,13 +3,10 @@
 namespace Tests\Feature;
 
 use App\Jobs\ProcessWhatsAppMessage;
-use App\Models\Conversation;
-use App\Models\Customer;
 use App\Models\Message;
 use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class WhatsAppWebhookTest extends TestCase

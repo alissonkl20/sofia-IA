@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main, stage]
+  pull_request:
+    branches: [main, stage]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php:
+    name: PHP Lint & Tests
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: sofia_ia_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -ppassword"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, openssl, curl, pdo_mysql
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Prepare application
+        run: |
+          cp .env.example .env
+          php artisan key:generate --ansi
+
+      - name: Lint (Pint)
+        run: vendor/bin/pint --test
+
+      - name: Run tests
+        run: php artisan test --ansi
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: sofia_ia_test
+          DB_USERNAME: root
+          DB_PASSWORD: password
+          SOFIA_FORCE_AI: "false"
+          SOFIA_AI_ENABLED: "true"

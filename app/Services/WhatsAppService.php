@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Conversation;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
