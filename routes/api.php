@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Controllers\Api\PortfolioChatController;
 use Illuminate\Support\Facades\Route;
 
-// API-only backend: webhook principal em routes/web.php (/webhook/whatsapp)
+Route::middleware(['portfolio.token', 'throttle:portfolio'])->prefix('portfolio')->group(function () {
+    Route::get('/status', [PortfolioChatController::class, 'status']);
+    Route::post('/chat', [PortfolioChatController::class, 'store']);
+    Route::get('/chat', [PortfolioChatController::class, 'show']);
+});

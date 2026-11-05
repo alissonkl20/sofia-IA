@@ -4,8 +4,8 @@ namespace App\Jobs;
 
 use App\Models\Conversation;
 use App\Models\Message;
-use App\Services\AIService;
 use App\Services\AttendanceService;
+use App\Services\SofiaReplyService;
 use App\Services\WhatsAppService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -27,7 +27,7 @@ class ProcessWhatsAppMessage implements ShouldQueue
 
     public function handle(
         AttendanceService $attendanceService,
-        AIService $aiService,
+        SofiaReplyService $sofiaReplyService,
         WhatsAppService $whatsAppService,
     ): void {
         $lock = Cache::lock("conversation:{$this->conversationId}:processing", 180);
@@ -43,7 +43,11 @@ class ProcessWhatsAppMessage implements ShouldQueue
                 ->with(['customer', 'messages'])
                 ->find($this->conversationId);
 
-            if (! $conversation || ! $attendanceService->shouldSofiaRespond($conversation)) {
+            if (! $conversation || $conversation->channel !== Conversation::CHANNEL_WHATSAPP) {
+                return;
+            }
+
+            if (! $attendanceService->shouldSofiaRespond($conversation)) {
                 return;
             }
 
@@ -53,44 +57,8 @@ class ProcessWhatsAppMessage implements ShouldQueue
                 return;
             }
 
-            $isFirstInteraction = $conversation->messages()
-                ->where('role', Message::ROLE_ASSISTANT)
-                ->doesntExist();
-
-            if ($isFirstInteraction) {
-                $aiResponse = [
-                    'message' => config('sofia.greeting'),
-                    'intent' => null,
-                    'stage' => 'greeting',
-                    'confidence' => 1,
-                    'needs_human' => false,
-                    'conversation_complete' => false,
-                    'data' => [],
-                ];
-            } else {
-                $aiResponse = $aiService->generateResponse($conversation);
-            }
-
-            if ($aiResponse['needs_human']) {
-                $aiResponse['message'] = config('sofia.transfer_message');
-            }
-
-            if ($aiResponse['conversation_complete']) {
-                $aiResponse['message'] = config('sofia.completion_message');
-            }
-
-            $conversation = $aiService->applyResponseToConversation($conversation, $aiResponse);
-
-            Message::query()->create([
-                'conversation_id' => $conversation->id,
-                'role' => Message::ROLE_ASSISTANT,
-                'content' => $aiResponse['message'],
-                'metadata' => [
-                    'intent' => $aiResponse['intent'],
-                    'stage' => $aiResponse['stage'],
-                    'confidence' => $aiResponse['confidence'],
-                ],
-            ]);
+            $aiResponse = $sofiaReplyService->generateAndPersist($conversation);
+            $conversation->refresh()->loadMissing('customer');
 
             $recipient = $conversation->customer->whatsapp_id
                 ?: $conversation->customer->phone;

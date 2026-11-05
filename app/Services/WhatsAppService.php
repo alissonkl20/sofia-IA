@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Conversation;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -31,10 +30,19 @@ class WhatsAppService
 
         $endpoint = $apiUrl.config('whatsapp.send_endpoint', '/send');
 
-        $response = $request->post($endpoint, [
-            'to' => $to,
-            'message' => $message,
-        ]);
+        try {
+            $response = $request->post($endpoint, [
+                'to' => $to,
+                'message' => $message,
+            ]);
+        } catch (\Throwable $exception) {
+            Log::error('WhatsApp send exception', [
+                'to' => $to,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return false;
+        }
 
         if (! $response->successful()) {
             Log::error('WhatsApp send failed', [
@@ -104,7 +112,7 @@ class WhatsAppService
         $expected = config('whatsapp.verify_token');
 
         if (! $expected) {
-            return true;
+            return false;
         }
 
         if (($token === null || $token === '') && app()->environment('local')) {

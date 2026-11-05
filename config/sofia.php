@@ -4,6 +4,10 @@ return [
 
     'name' => 'SOFIA IA',
 
+    'force_ai' => filter_var(env('SOFIA_FORCE_AI', false), FILTER_VALIDATE_BOOLEAN),
+
+    'whatsapp_phone' => env('WHATSAPP_PHONE'),
+
     'owner' => [
         'name' => 'Alisson de Almeida de Oliveira',
         'role' => 'Desenvolvedor Full Stack',

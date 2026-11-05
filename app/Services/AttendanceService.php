@@ -50,6 +50,10 @@ class AttendanceService
 
     public function isHumanAttendanceActive(): bool
     {
+        if (config('sofia.force_ai', false)) {
+            return false;
+        }
+
         if ($this->isHumanManuallyOnline()) {
             return true;
         }
@@ -71,15 +75,19 @@ class AttendanceService
             return false;
         }
 
-        if ($this->isHumanAttendanceActive()) {
+        if ($conversation->channel !== Conversation::CHANNEL_PORTFOLIO && $this->isHumanAttendanceActive()) {
             return false;
         }
 
         return $conversation->status === Conversation::STATUS_AI;
     }
 
-    public function initialConversationStatus(): string
+    public function initialConversationStatus(?string $channel = null): string
     {
+        if ($channel === Conversation::CHANNEL_PORTFOLIO) {
+            return Conversation::STATUS_AI;
+        }
+
         if ($this->isHumanAttendanceActive()) {
             return Conversation::STATUS_HUMAN;
         }
