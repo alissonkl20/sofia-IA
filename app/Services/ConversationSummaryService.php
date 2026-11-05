@@ -14,7 +14,8 @@ class ConversationSummaryService
         $lines = [
             'CLIENTE',
             'Nome: '.($conversation->customer->name ?: 'Não informado'),
-            'Telefone: '.$conversation->customer->phone,
+            'Telefone: '.($conversation->customer->phone ?: 'Não informado'),
+            'E-mail: '.($conversation->customer->email ?: 'Não informado'),
             '',
             'SERVIÇO',
             $this->label($data['service'] ?? $conversation->intent),

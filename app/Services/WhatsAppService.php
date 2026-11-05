@@ -112,7 +112,7 @@ class WhatsAppService
         $expected = config('whatsapp.verify_token');
 
         if (! $expected) {
-            return true;
+            return false;
         }
 
         if (($token === null || $token === '') && app()->environment('local')) {

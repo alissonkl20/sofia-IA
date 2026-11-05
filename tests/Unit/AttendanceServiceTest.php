@@ -40,6 +40,18 @@ class AttendanceServiceTest extends TestCase
         $this->assertFalse($service->shouldSofiaRespond($conversation));
     }
 
+    public function test_portfolio_channel_responds_when_human_is_online(): void
+    {
+        Setting::set('ai_enabled', true);
+        Setting::set('human_online', true);
+
+        $conversation = $this->makeConversation(Conversation::STATUS_AI, Conversation::CHANNEL_PORTFOLIO);
+        $service = app(AttendanceService::class);
+
+        $this->assertTrue($service->shouldSofiaRespond($conversation));
+        $this->assertSame(Conversation::STATUS_AI, $service->initialConversationStatus(Conversation::CHANNEL_PORTFOLIO));
+    }
+
     public function test_sofia_does_not_respond_when_conversation_is_human(): void
     {
         Setting::set('human_online', false);
@@ -55,7 +67,7 @@ class AttendanceServiceTest extends TestCase
         $this->assertFalse($service->shouldSofiaRespond($conversation));
     }
 
-    protected function makeConversation(string $status): Conversation
+    protected function makeConversation(string $status, string $channel = Conversation::CHANNEL_WHATSAPP): Conversation
     {
         $customer = Customer::query()->create([
             'phone' => '5511999999999',
@@ -64,6 +76,7 @@ class AttendanceServiceTest extends TestCase
 
         return Conversation::query()->create([
             'customer_id' => $customer->id,
+            'channel' => $channel,
             'status' => $status,
             'collected_data' => [],
         ]);

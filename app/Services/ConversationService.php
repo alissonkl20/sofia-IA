@@ -55,12 +55,13 @@ class ConversationService
                 $customer->update(['whatsapp_id' => $incoming['whatsapp_id']]);
             }
 
-            $conversation = $customer->activeConversation();
+            $conversation = $customer->activeConversation(Conversation::CHANNEL_WHATSAPP);
 
             if (! $conversation) {
                 $conversation = Conversation::query()->create([
                     'customer_id' => $customer->id,
-                    'status' => $this->attendanceService->initialConversationStatus(),
+                    'channel' => Conversation::CHANNEL_WHATSAPP,
+                    'status' => $this->attendanceService->initialConversationStatus(Conversation::CHANNEL_WHATSAPP),
                     'collected_data' => [],
                 ]);
             }

@@ -10,7 +10,9 @@ class Customer extends Model
     protected $fillable = [
         'name',
         'phone',
+        'email',
         'whatsapp_id',
+        'portfolio_session_id',
     ];
 
     public function conversations(): HasMany
@@ -18,11 +20,15 @@ class Customer extends Model
         return $this->hasMany(Conversation::class);
     }
 
-    public function activeConversation(): ?Conversation
+    public function activeConversation(?string $channel = null): ?Conversation
     {
-        return $this->conversations()
-            ->whereNot('status', Conversation::STATUS_CLOSED)
-            ->latest()
-            ->first();
+        $query = $this->conversations()
+            ->whereNot('status', Conversation::STATUS_CLOSED);
+
+        if ($channel !== null) {
+            $query->where('channel', $channel);
+        }
+
+        return $query->latest()->first();
     }
 }

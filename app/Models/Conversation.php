@@ -16,8 +16,17 @@ class Conversation extends Model
 
     public const STATUS_CLOSED = 'closed';
 
+    public const CHANNEL_WHATSAPP = 'whatsapp';
+
+    public const CHANNEL_PORTFOLIO = 'portfolio';
+
+    protected $attributes = [
+        'channel' => self::CHANNEL_WHATSAPP,
+    ];
+
     protected $fillable = [
         'customer_id',
+        'channel',
         'status',
         'stage',
         'intent',

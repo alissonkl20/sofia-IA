@@ -8,6 +8,8 @@ return [
 
     'timeout' => (int) env('OLLAMA_TIMEOUT', 120),
 
+    'health_timeout' => (int) env('OLLAMA_HEALTH_TIMEOUT', 3),
+
     'context_messages' => (int) env('SOFIA_CONTEXT_MESSAGES', 12),
 
     'enabled' => filter_var(env('SOFIA_AI_ENABLED', true), FILTER_VALIDATE_BOOLEAN),

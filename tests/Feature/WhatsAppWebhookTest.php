@@ -33,6 +33,19 @@ class WhatsAppWebhookTest extends TestCase
         $response->assertUnauthorized();
     }
 
+    public function test_webhook_rejects_requests_when_token_is_not_configured(): void
+    {
+        config(['whatsapp.verify_token' => null]);
+
+        $this->postJson('/webhook/whatsapp', [
+            'from' => '5511999999999@c.us',
+            'chatId' => '5511999999999@c.us',
+            'body' => 'Olá',
+        ], [
+            'X-Webhook-Token' => 'any-token',
+        ])->assertUnauthorized();
+    }
+
     public function test_webhook_accepts_message_and_queues_job_when_ai_should_respond(): void
     {
         Bus::fake();
@@ -52,6 +65,7 @@ class WhatsAppWebhookTest extends TestCase
             ->assertJsonPath('sofia_queued', true);
 
         $this->assertDatabaseHas('customers', ['phone' => '5511999999999']);
+        $this->assertDatabaseHas('conversations', ['channel' => 'whatsapp']);
         $this->assertDatabaseHas('messages', [
             'external_message_id' => 'msg-001',
             'role' => Message::ROLE_USER,

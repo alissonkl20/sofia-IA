@@ -15,6 +15,19 @@ class AIService
         protected ConversationSummaryService $summaryService,
     ) {}
 
+    public function isReachable(): bool
+    {
+        try {
+            $response = Http::connectTimeout((int) config('ai.health_timeout', 3))
+                ->timeout((int) config('ai.health_timeout', 3))
+                ->get(rtrim(config('ai.url'), '/').'/api/tags');
+
+            return $response->successful();
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
     public function generateResponse(Conversation $conversation): array
     {
         $startedAt = microtime(true);

@@ -34,6 +34,7 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="SOFIA_FORCE_AI" value="false"/>
         <env name="SOFIA_AI_ENABLED" value="true"/>
+        <env name="PORTFOLIO_API_TOKEN" value="test-portfolio-token"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
